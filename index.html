@@ -98,7 +98,6 @@
 
         #noBtn.moving {
             box-shadow: 0 0 20px rgba(244, 67, 54, 0.4);
-            transform: scale(0.9);
         }
 
         #finalizeBtn {
@@ -262,6 +261,7 @@
         const questionHead = document.getElementById('question');
 
         let yesFontSize = 1.2;
+        let noScale = 1.0;
         let noClickCount = 0;
 
         // Initialize Date Picker to tomorrow
@@ -347,6 +347,10 @@
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
             noBtn.classList.add('moving');
+
+            noScale -= 0.1;
+            if (noScale < 0.3) noScale = 0.3; // Prevent the button from becoming too small to see
+            noBtn.style.transform = `scale(${noScale})`;
 
             yesFontSize += 0.4;
             yesBtn.style.fontSize = `${yesFontSize}rem`;
