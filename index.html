@@ -124,6 +124,13 @@
             line-height: 1.6;
         }
 
+        #emailBtn {
+            background-color: #007bff;
+            color: white;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
         .options-container {
             display: none;
             text-align: left;
@@ -240,6 +247,7 @@
         <div id="success" class="success-message">
             <div class="success-title">It's a date! 💖</div>
             <div id="summary" class="summary-card"></div>
+            <button id="emailBtn">Email the details ✉️</button>
         </div>
     </div>
 
@@ -253,6 +261,7 @@
         // UI Elements
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
+        const emailBtn = document.getElementById('emailBtn');
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const finalizeBtn = document.getElementById('finalizeBtn');
@@ -340,21 +349,23 @@
         ];
 
         function moveButton() {
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            // Use fixed positioning relative to viewport and keep it in bounds
+            const x = Math.max(20, Math.min(window.innerWidth - noBtn.offsetWidth - 20, Math.random() * window.innerWidth));
+            const y = Math.max(20, Math.min(window.innerHeight - noBtn.offsetHeight - 20, Math.random() * window.innerHeight));
             
-            noBtn.style.position = 'absolute';
+            noBtn.style.position = 'fixed';
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
+            noBtn.style.zIndex = '1000';
             noBtn.classList.add('moving');
 
             noScale -= 0.1;
             if (noScale < 0.3) noScale = 0.3; // Prevent the button from becoming too small to see
             noBtn.style.transform = `scale(${noScale})`;
 
-            yesFontSize += 0.4;
+            yesFontSize += 0.8; // Dramatically increase growth
             yesBtn.style.fontSize = `${yesFontSize}rem`;
-            yesBtn.style.padding = `${0.8 + (noClickCount * 0.1)}em ${2 + (noClickCount * 0.2)}em`;
+            yesBtn.style.padding = `${0.8 + (noClickCount * 0.2)}em ${2 + (noClickCount * 0.4)}em`;
             
             noBtn.innerText = noPhrases[Math.min(noClickCount, noPhrases.length - 1)];
             noClickCount++;
@@ -365,6 +376,7 @@
         }
 
         noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('click', moveButton); // escaping if they manage to click
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Prevents the actual click/tap from occurring
             moveButton();
@@ -399,6 +411,13 @@
                 🍽️ <strong>${food}</strong><br>
                 🕒 <strong>${time}</strong>
             `;
+
+            const emailSubject = encodeURIComponent("It's a Date! 💖");
+            const emailBody = encodeURIComponent(`I can't wait for our ${vibe} date!\n\nDetails:\n📅 ${dateString}\n📍 ${activity}\n🍽️ ${food}\n🕒 ${time}`);
+            
+            emailBtn.onclick = () => {
+                window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+            };
 
             step2.style.display = 'none';
             successMsg.style.display = 'block';
