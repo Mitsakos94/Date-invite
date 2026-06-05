@@ -241,6 +241,11 @@
                 <input type="date" id="datePicker">
             </div>
 
+            <div class="option-group">
+                <label>Send confirmation to: 📧</label>
+                <input type="email" id="recipientEmail" placeholder="Enter your email address">
+            </div>
+
             <button id="finalizeBtn">Confirm Date ✨</button>
         </div>
 
@@ -349,11 +354,18 @@
         ];
 
         function moveButton() {
-            // Use fixed positioning relative to viewport and keep it in bounds
-            const x = Math.max(20, Math.min(window.innerWidth - noBtn.offsetWidth - 20, Math.random() * window.innerWidth));
-            const y = Math.max(20, Math.min(window.innerHeight - noBtn.offsetHeight - 20, Math.random() * window.innerHeight));
-            
+            // Ensure the button is removed from layout flow for accurate coordinate placement
             noBtn.style.position = 'fixed';
+            
+            // Calculate safe boundaries based on current viewport size and current scale
+            const rect = noBtn.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width - 50;
+            const maxY = window.innerHeight - rect.height - 50;
+
+            // Ensure the button stays within the viewport
+            const x = Math.max(25, Math.min(maxX, Math.random() * window.innerWidth));
+            const y = Math.max(25, Math.min(maxY, Math.random() * window.innerHeight));
+            
             noBtn.style.left = `${x}px`;
             noBtn.style.top = `${y}px`;
             noBtn.style.zIndex = '1000';
@@ -363,9 +375,9 @@
             if (noScale < 0.3) noScale = 0.3; // Prevent the button from becoming too small to see
             noBtn.style.transform = `scale(${noScale})`;
 
-            yesFontSize += 0.8; // Dramatically increase growth
+            yesFontSize += 1.8; // Even more dramatic growth
             yesBtn.style.fontSize = `${yesFontSize}rem`;
-            yesBtn.style.padding = `${0.8 + (noClickCount * 0.2)}em ${2 + (noClickCount * 0.4)}em`;
+            yesBtn.style.padding = `${1 + (noClickCount * 0.4)}em ${2.5 + (noClickCount * 0.6)}em`;
             
             noBtn.innerText = noPhrases[Math.min(noClickCount, noPhrases.length - 1)];
             noClickCount++;
@@ -400,6 +412,7 @@
             const time = document.getElementById('timeOfDay').options[document.getElementById('timeOfDay').selectedIndex].text;
             const vibe = document.getElementById('vibe').options[document.getElementById('vibe').selectedIndex].text;
             const dateValue = document.getElementById('datePicker').value;
+            const recipient = document.getElementById('recipientEmail').value;
 
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = dateValue ? new Date(dateValue).toLocaleDateString(undefined, dateOptions) : "soon";
@@ -416,7 +429,7 @@
             const emailBody = encodeURIComponent(`I can't wait for our ${vibe} date!\n\nDetails:\n📅 ${dateString}\n📍 ${activity}\n🍽️ ${food}\n🕒 ${time}`);
             
             emailBtn.onclick = () => {
-                window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+                window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${emailBody}`;
             };
 
             step2.style.display = 'none';
