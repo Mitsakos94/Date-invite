@@ -124,6 +124,14 @@
             line-height: 1.6;
         }
 
+        #whatsappBtn {
+            background-color: #25d366;
+            color: white;
+            margin-top: 1.5rem;
+            width: 100%;
+            display: inline-block;
+        }
+
         #emailBtn {
             background-color: #007bff;
             color: white;
@@ -148,13 +156,19 @@
             color: #555;
         }
 
-        select, input[type="date"] {
+        select, input[type="date"], input[type="email"], textarea {
             width: 100%;
             padding: 0.8rem;
             border-radius: 10px;
             border: 1px solid #ddd;
             font-size: 1rem;
             outline: none;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: none;
+            font-family: inherit;
         }
 
         @keyframes floatCard {
@@ -246,12 +260,18 @@
                 <input type="email" id="recipientEmail" placeholder="Enter your email address">
             </div>
 
+            <div class="option-group">
+                <label>Add a special message? 💌</label>
+                <textarea id="personalMessage" rows="2" placeholder="Write something sweet..."></textarea>
+            </div>
+
             <button id="finalizeBtn">Confirm Date ✨</button>
         </div>
 
         <div id="success" class="success-message">
             <div class="success-title">It's a date! 💖</div>
             <div id="summary" class="summary-card"></div>
+            <button id="whatsappBtn">WhatsApp the details 💬</button>
             <button id="emailBtn">Email the details ✉️</button>
         </div>
     </div>
@@ -267,6 +287,7 @@
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
         const emailBtn = document.getElementById('emailBtn');
+        const whatsappBtn = document.getElementById('whatsappBtn');
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const finalizeBtn = document.getElementById('finalizeBtn');
@@ -415,6 +436,8 @@
 
         finalizeBtn.addEventListener('click', () => {
             const recipient = document.getElementById('recipientEmail').value;
+            const message = document.getElementById('personalMessage').value;
+
             if (!recipient || !recipient.includes('@')) {
                 alert('Please enter a valid email address so I can get the confirmation! ❤️');
                 return;
@@ -434,17 +457,23 @@
                 📅 <strong>${dateString}</strong><br>
                 📍 <strong>${activity}</strong><br>
                 🍽️ <strong>${food}</strong><br>
-                🕒 <strong>${time}</strong>
+                🕒 <strong>${time}</strong>${message ? `<br><br>💌 <em>"${message}"</em>` : ''}
             `;
 
+            const textDetails = `I can't wait for our ${vibe} date!\n\nDetails:\n📅 ${dateString}\n📍 ${activity}\n🍽️ ${food}\n🕒 ${time}${message ? `\n\nNote: ${message}` : ''}`;
             const emailSubject = encodeURIComponent("It's a Date! 💖");
-            const emailBody = encodeURIComponent(`I can't wait for our ${vibe} date!\n\nDetails:\n📅 ${dateString}\n📍 ${activity}\n🍽️ ${food}\n🕒 ${time}`);
+            const encodedBody = encodeURIComponent(textDetails);
             
             // Auto-trigger the email client immediately
-            window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${emailBody}`;
+            window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${encodedBody}`;
 
             emailBtn.onclick = () => {
-                window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${emailBody}`;
+                window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${encodedBody}`;
+            };
+
+            whatsappBtn.onclick = () => {
+                const waUrl = `https://wa.me/?text=${encodedBody}`;
+                window.open(waUrl, '_blank');
             };
 
             step2.style.display = 'none';
