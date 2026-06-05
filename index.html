@@ -110,9 +110,19 @@
 
         .success-message {
             display: none;
-            font-size: 2.5rem;
             color: #d63384;
+        }
+
+        .success-title {
+            font-size: 2.5rem;
             animation: heartBeat 1.5s infinite;
+        }
+
+        .summary-card {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 1.5rem;
+            line-height: 1.6;
         }
 
         .options-container {
@@ -228,7 +238,10 @@
             <button id="finalizeBtn">Confirm Date ✨</button>
         </div>
 
-        <div id="success" class="success-message">It's a date! 💖</div>
+        <div id="success" class="success-message">
+            <div class="success-title">It's a date! 💖</div>
+            <div id="summary" class="summary-card"></div>
+        </div>
     </div>
 
     <audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
@@ -366,6 +379,23 @@
         });
 
         finalizeBtn.addEventListener('click', () => {
+            const activity = document.getElementById('activity').options[document.getElementById('activity').selectedIndex].text;
+            const food = document.getElementById('food').options[document.getElementById('food').selectedIndex].text;
+            const time = document.getElementById('timeOfDay').options[document.getElementById('timeOfDay').selectedIndex].text;
+            const vibe = document.getElementById('vibe').options[document.getElementById('vibe').selectedIndex].text;
+            const dateValue = document.getElementById('datePicker').value;
+
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = dateValue ? new Date(dateValue).toLocaleDateString(undefined, dateOptions) : "soon";
+
+            document.getElementById('summary').innerHTML = `
+                Can't wait for our <strong>${vibe}</strong> date!<br><br>
+                📅 <strong>${dateString}</strong><br>
+                📍 <strong>${activity}</strong><br>
+                🍽️ <strong>${food}</strong><br>
+                🕒 <strong>${time}</strong>
+            `;
+
             step2.style.display = 'none';
             successMsg.style.display = 'block';
             confetti({
