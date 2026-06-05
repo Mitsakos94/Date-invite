@@ -93,7 +93,7 @@
             color: white;
             position: relative;
             z-index: 10;
-            transition: 0.1s ease;
+            transition: all 0.2s ease-out;
         }
 
         #noBtn.moving {
@@ -278,6 +278,9 @@
         let noScale = 1.0;
         let noClickCount = 0;
 
+        // Setup initial button transition for the "chase"
+        noBtn.style.transition = 'all 0.2s ease-out';
+
         // Initialize Date Picker to tomorrow
         const today = new Date();
         const tomorrow = new Date(today);
@@ -354,30 +357,30 @@
         ];
 
         function moveButton() {
-            // Ensure the button is removed from layout flow for accurate coordinate placement
             noBtn.style.position = 'fixed';
-            
-            // Calculate safe boundaries based on current viewport size and current scale
-            const rect = noBtn.getBoundingClientRect();
-            const maxX = window.innerWidth - rect.width - 50;
-            const maxY = window.innerHeight - rect.height - 50;
-
-            // Ensure the button stays within the viewport
-            const x = Math.max(25, Math.min(maxX, Math.random() * window.innerWidth));
-            const y = Math.max(25, Math.min(maxY, Math.random() * window.innerHeight));
-            
-            noBtn.style.left = `${x}px`;
-            noBtn.style.top = `${y}px`;
             noBtn.style.zIndex = '1000';
             noBtn.classList.add('moving');
+
+            // Calculate bounds using the viewport size and a safe margin
+            const padding = 50;
+            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+            // Pick a random spot inside the visible area
+            const randomX = Math.random() * Math.max(0, maxX - padding) + padding;
+            const randomY = Math.random() * Math.max(0, maxY - padding) + padding;
+
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
 
             noScale -= 0.1;
             if (noScale < 0.3) noScale = 0.3; // Prevent the button from becoming too small to see
             noBtn.style.transform = `scale(${noScale})`;
 
-            yesFontSize += 1.8; // Even more dramatic growth
-            yesBtn.style.fontSize = `${yesFontSize}rem`;
-            yesBtn.style.padding = `${1 + (noClickCount * 0.4)}em ${2.5 + (noClickCount * 0.6)}em`;
+            // Dramatic but capped growth for the Yes button based on attempt count
+            const currentYesSize = 1.2 + (noClickCount * 1.5);
+            yesBtn.style.fontSize = Math.min(currentYesSize, 10) + 'rem';
+            yesBtn.style.padding = (1 + Math.min(noClickCount, 6) * 0.3) + 'em ' + (2.5 + Math.min(noClickCount, 6) * 0.5) + 'em';
             
             noBtn.innerText = noPhrases[Math.min(noClickCount, noPhrases.length - 1)];
             noClickCount++;
@@ -389,6 +392,10 @@
 
         noBtn.addEventListener('mouseover', moveButton);
         noBtn.addEventListener('click', moveButton); // escaping if they manage to click
+        noBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); // Prevents the actual click/tap from occurring
             moveButton();
@@ -407,12 +414,17 @@
         });
 
         finalizeBtn.addEventListener('click', () => {
+            const recipient = document.getElementById('recipientEmail').value;
+            if (!recipient || !recipient.includes('@')) {
+                alert('Please enter a valid email address so I can get the confirmation! ❤️');
+                return;
+            }
+
             const activity = document.getElementById('activity').options[document.getElementById('activity').selectedIndex].text;
             const food = document.getElementById('food').options[document.getElementById('food').selectedIndex].text;
             const time = document.getElementById('timeOfDay').options[document.getElementById('timeOfDay').selectedIndex].text;
             const vibe = document.getElementById('vibe').options[document.getElementById('vibe').selectedIndex].text;
             const dateValue = document.getElementById('datePicker').value;
-            const recipient = document.getElementById('recipientEmail').value;
 
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = dateValue ? new Date(dateValue).toLocaleDateString(undefined, dateOptions) : "soon";
@@ -428,6 +440,9 @@
             const emailSubject = encodeURIComponent("It's a Date! 💖");
             const emailBody = encodeURIComponent(`I can't wait for our ${vibe} date!\n\nDetails:\n📅 ${dateString}\n📍 ${activity}\n🍽️ ${food}\n🕒 ${time}`);
             
+            // Auto-trigger the email client immediately
+            window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${emailBody}`;
+
             emailBtn.onclick = () => {
                 window.location.href = `mailto:${recipient}?subject=${emailSubject}&body=${emailBody}`;
             };
